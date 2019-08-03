@@ -5,26 +5,46 @@
       <p>Use <a href="http://element.eleme.io/?ref=madewithvuejs.com#/en-US" target="_blank">this</a> library</p>
     </div>
     <div class="row mb-1">
-      <!-- Your components goes here!-->
-      <!--
-        <your-component
-          :data="inputData"
-          @change="handleChangeData"
-        />
-        -->
+      <p>Custom Input</p>
+      <CustomInput v-model="inputData" />
+    </div>
+    <div class="row mb-1">
+      <p>Custom Datepicker</p>
+      <DatePicker v-model="dateData" />
+    </div>
+    <div class="row mb-1">
+      <p class="color-picker__label">Custom Colorpicker</p>
+      <ColorPicker :value="color" />
+    </div>
+    <div class="row mb-1">
+      <p>Custom Select</p>
+      <CustomSelect :selectOptions="selectOptions" v-model="selectValue" />
     </div>
   </div>
 </template>
 
 <script>
+import CustomInput from './Test2Component/input'
+import DatePicker from './Test2Component/datepicker'
+import ColorPicker from './Test2Component/colorpicker'
+import CustomSelect from './Test2Component/custom-select'
+const axios = require('axios')
 
 export default {
   name: 'Test2',
+  components: {
+    CustomInput,
+    DatePicker,
+    ColorPicker,
+    CustomSelect
+  },
   data () {
     return {
       inputData: '',
       dateData: '',
-      color: ''
+      color: '',
+      selectOptions: [],
+      selectValue: ''
     }
   },
   mounted () {
@@ -33,6 +53,11 @@ export default {
       this.dateData = '1551693570892'
       this.color = '#cdcdcd'
     }, 900)
+    axios
+      .get('http://localhost:3030/modifier')
+      .then(response => {
+        this.selectOptions = [ ...response.data.items ]
+      })
   },
   methods: {
     handleChangeData (newValue) {
@@ -110,5 +135,7 @@ export default {
   *, :after, :before {
     box-sizing: border-box;
   }
-
+  .color-picker__label {
+    margin-right: 10px;
+  }
 </style>

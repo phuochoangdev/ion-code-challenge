@@ -5,19 +5,114 @@
       <p>More detailed in <strong>readme.md</strong> file</p>
     </div>
     <!--Your code goes here!-->
+    <el-form ref="form" :model="form" label-width="120px">
+      <el-form-item
+        v-for="item in eleForm"
+        :key="item.value"
+        :label="item.label"
+        :rules="{
+          required: item.required,
+          message: 'Please input ' + item.label,
+          trigger: item.valueType.value == 'REFERENCE' && form[item.value] ? 'change' : 'blur'
+        }"
+        :prop="item.value"
+      >
+        <CustomInput
+          v-model="form[item.value]"
+          :disabled="item.disabled"
+          :required="item.required"
+          :typeInput="item.valueType.value == 'LONG' ? 'number' : ''"
+          v-if="item.valueType.value == 'LONG' || item.valueType.value == 'STRING'"
+        />
+        <DatePicker
+          v-model="form[item.value]"
+          :disabled="item.disabled"
+          :required="item.required"
+          v-if="item.valueType.value == 'DATE'"
+        />
+        <CustomSelect
+          :selectOptions="selectOptions[item.value]"
+          :disabled="item.disabled"
+          :required="item.required"
+          v-if="item.valueType.value == 'REFERENCE'"
+          v-model="form[item.value]"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit">Submit</el-button>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 
 <script>
-/********
- * Render a form with the following requirements:
-    - Use data from this end point localhost:8080/structure as the structure of this form. Keep in mind that this structure can be changed dynamically.
-    - Use data from this end point localhost:8080/data as initial data.
-    - Add validation (for fields those marked 'required' in structure)
- * API explaination:
-  -
-*******/
+import CustomInput from './Test2Component/input'
+import DatePicker from './Test2Component/datepicker'
+import CustomSelect from './Test2Component/custom-select'
+const axios = require('axios')
+
 export default {
+  name: 'Test3',
+  components: {
+    CustomInput,
+    DatePicker,
+    CustomSelect
+  },
+  data () {
+    return {
+      eleForm: [],
+      form: {},
+      selectOptions: {
+        owner: [],
+        modifier: []
+      }
+    }
+  },
+  mounted () {
+    axios
+      .get('http://localhost:3030/structure')
+      .then(response => {
+        this.eleForm = [ ...response.data ]
+      })
+    axios
+      .get('http://localhost:3030/modifier')
+      .then(response => {
+        this.selectOptions.modifier = [ ...response.data.items ]
+      })
+    axios
+      .get('http://localhost:3030/owner')
+      .then(response => {
+        this.selectOptions.owner = [ ...response.data.items ]
+      })
+    axios
+      .get('http://localhost:3030/data')
+      .then(response => {
+        const dataFormated = this.formatData(response.data)
+        this.form = dataFormated
+      })
+  },
+  methods: {
+    onSubmit () {
+      console.log(this.form)
+      this.$refs.form.validate((valid) => {
+        if (valid) {
+          alert('submit!')
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    formatData (data) {
+      for (var property in data) {
+        if (property === 'owner' || property === 'modifier') {
+          data[property] = data[property].refId
+        }
+      }
+
+      return data
+    }
+  }
 }
 </script>
 

@@ -4,16 +4,22 @@
     <p>Note: the amount of Column can be changed dynamically. </p>
     <div class="form-group">
       <label>Type</label>
-      <input type="text" class="">
+      <input type="text" class="" v-model="type">
       <label>Q&A</label>
-      <input type="name" class="">
-      <button type="submit" class="btn btn-primary">Add</button>
+      <input type="name" class="" v-model="question">
+      <button type="submit" class="btn btn-primary" v-on:click="onAdd">Add</button>
+    </div>
+    <div class="form-group" v-if="error || successfull">
+      <br/>
+      <label class="error" v-if="error">Type or Q&A must be filled.</label>
+      <label class="successfull" v-if="successfull">Add data successfully.</label>
     </div>
     <br/>
     <div class="form-group">
-    <input type="text" class="" style="width:500px" >
-      <button type="submit" class="btn btn-primary">Search</button>
+      <input type="text" class="" style="width:500px" v-model="search">
+      <button type="submit" class="btn btn-primary" v-on:click="onSearch">Search</button>
     </div>
+    <br/>
     <table class="table ui-accordion">
       <caption></caption>
       <colgroup>
@@ -27,11 +33,8 @@
       </tr>
       </thead>
       <tbody>
-
-        <tr class="head" :key="key">
-          <td>NUMBER</td>
-          <td>STRING</td>
-          <td>TEXT</td>
+        <tr class="head" v-for="row in rows" :key="row.order">
+          <td v-for="column in data.columns" :key="column.field">{{ row[column.field] }}</td>
         </tr>
       </tbody>
     </table>
@@ -46,19 +49,76 @@ export default {
     return {
       data: {
         columns: [],
+        originalRows: [],
         rows: []
       },
-      search: ''
+      search: '',
+      type: '',
+      question: '',
+      error: false,
+      successfull: false
     }
   },
+
   mounted () {
     this.data.columns = [ ...jsonData.columns ]
+    this.data.originalRows = [ ...jsonData.rows ]
     this.data.rows = [ ...jsonData.rows ]
   },
 
   computed: {
     rows () {
       return this.data.rows || []
+    }
+  },
+
+  methods: {
+    onSearch () {
+      const keyword = this.search
+
+      if (keyword) {
+        this.data.rows = [ ...this.data.originalRows ].filter((item) => {
+          const values = Object.values(item)
+
+          const exits = values.filter((val) => {
+            return this.isExits(keyword, val)
+          })
+
+          return exits.length
+        })
+      } else {
+        this.data.rows = [ ...this.data.originalRows ]
+      }
+    },
+
+    isExits (keyword, value) {
+      if (!isNaN(value)) {
+        value = value + ''
+      }
+
+      return value.indexOf(keyword) !== -1
+    },
+
+    onAdd () {
+      this.error = false
+      this.successfull = false
+      if (!this.type && !this.question) {
+        this.error = true
+
+        return false
+      }
+      const newValue = {
+        order: this.data.originalRows.length + 1,
+        type: this.type,
+        question: this.question
+      }
+
+      this.search = ''
+      this.type = ''
+      this.question = ''
+      this.data.originalRows.push(newValue)
+      this.data.rows = [ ...this.data.originalRows ]
+      this.successfull = true
     }
   }
 }
@@ -68,6 +128,7 @@ export default {
   .table-wrap {
     border-top: 1px solid #767676;
     border-bottom: 1px solid #767676;
+    margin: 0 auto;
   }
   table.ui-accordion {
     border-top: none;
@@ -210,5 +271,11 @@ export default {
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
+  }
+  .error {
+    color: red;
+  }
+  .successfull {
+    color: green;
   }
 </style>
