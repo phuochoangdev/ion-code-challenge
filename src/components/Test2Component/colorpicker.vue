@@ -1,5 +1,5 @@
 <template>
-  <el-color-picker v-model="internalValue"></el-color-picker>
+  <el-color-picker :value="internalValue" v-on:change="onChange($event)"></el-color-picker>
 </template>
 <script>
 export default {
@@ -15,6 +15,11 @@ export default {
   watch: {
     value () {
       this.internalValue = this.value
+    }
+  },
+  methods: {
+    onChange (e) {
+      this.$emit('input', e)
     }
   }
 }

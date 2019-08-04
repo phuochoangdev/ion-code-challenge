@@ -14,11 +14,11 @@
     </div>
     <div class="row mb-1">
       <p class="color-picker__label">Custom Colorpicker</p>
-      <ColorPicker :value="color" />
+      <ColorPicker v-model="color" />
     </div>
     <div class="row mb-1">
       <p>Custom Select</p>
-      <CustomSelect :selectOptions="selectOptions" v-model="selectValue" />
+      <CustomSelect :selectOptionsUrl="selectOptionsUrl" v-model="selectValue" />
     </div>
   </div>
 </template>
@@ -28,7 +28,6 @@ import CustomInput from './Test2Component/input'
 import DatePicker from './Test2Component/datepicker'
 import ColorPicker from './Test2Component/colorpicker'
 import CustomSelect from './Test2Component/custom-select'
-const axios = require('axios')
 
 export default {
   name: 'Test2',
@@ -43,7 +42,7 @@ export default {
       inputData: '',
       dateData: '',
       color: '',
-      selectOptions: [],
+      selectOptionsUrl: 'http://localhost:3030/modifier',
       selectValue: ''
     }
   },
@@ -53,11 +52,6 @@ export default {
       this.dateData = '1551693570892'
       this.color = '#cdcdcd'
     }, 900)
-    axios
-      .get('http://localhost:3030/modifier')
-      .then(response => {
-        this.selectOptions = [ ...response.data.items ]
-      })
   },
   methods: {
     handleChangeData (newValue) {

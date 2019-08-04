@@ -15,23 +15,27 @@
   </el-select>
 </template>
 <script>
+const axios = require('axios')
+
 export default {
   name: 'custom-select',
   props: {
-    selectOptions: Array,
+    selectOptionsUrl: String,
     value: String,
     disabled: Boolean,
     required: Boolean
   },
   data () {
     return {
-      options: this.selectOptions
+      options: []
     }
   },
-  watch: {
-    selectOptions () {
-      this.options = this.selectOptions
-    }
+  created () {
+    axios
+      .get(this.selectOptionsUrl)
+      .then(response => {
+        this.options = [ ...response.data.items ]
+      })
   },
   methods: {
     onChange (e) {

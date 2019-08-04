@@ -17,26 +17,15 @@
         }"
         :prop="item.value"
       >
-        <CustomInput
-          v-model="form[item.value]"
-          :disabled="item.disabled"
-          :required="item.required"
-          :typeInput="item.valueType.value == 'LONG' ? 'number' : ''"
-          v-if="item.valueType.value == 'LONG' || item.valueType.value == 'STRING'"
-        />
-        <DatePicker
-          v-model="form[item.value]"
-          :disabled="item.disabled"
-          :required="item.required"
-          v-if="item.valueType.value == 'DATE'"
-        />
-        <CustomSelect
-          :selectOptions="selectOptions[item.value]"
-          :disabled="item.disabled"
-          :required="item.required"
-          v-if="item.valueType.value == 'REFERENCE'"
-          v-model="form[item.value]"
-        />
+        <keep-alive>
+          <component
+            v-bind:is="currentComponent[item.valueType.value]"
+            v-model="form[item.value]"
+            :disabled="item.disabled"
+            :required="item.required"
+            :typeInput="item.valueType.value == 'LONG' ? 'number' : ''"
+            :selectOptionsUrl="selectOptionsUrl[item.value]"></component>
+        </keep-alive>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">Submit</el-button>
@@ -62,9 +51,15 @@ export default {
     return {
       eleForm: [],
       form: {},
-      selectOptions: {
-        owner: [],
-        modifier: []
+      selectOptionsUrl: {
+        owner: 'http://localhost:3030/modifier',
+        modifier: 'http://localhost:3030/owner'
+      },
+      currentComponent: {
+        LONG: CustomInput,
+        STRING: CustomInput,
+        DATE: DatePicker,
+        REFERENCE: CustomSelect
       }
     }
   },
@@ -73,16 +68,6 @@ export default {
       .get('http://localhost:3030/structure')
       .then(response => {
         this.eleForm = [ ...response.data ]
-      })
-    axios
-      .get('http://localhost:3030/modifier')
-      .then(response => {
-        this.selectOptions.modifier = [ ...response.data.items ]
-      })
-    axios
-      .get('http://localhost:3030/owner')
-      .then(response => {
-        this.selectOptions.owner = [ ...response.data.items ]
       })
     axios
       .get('http://localhost:3030/data')
