@@ -19,7 +19,7 @@
     "chart.js": "^2.8.0",
     "chartkick": "^3.1.1",
     "element-ui": "^2.11.1",
-    "express": "^4.16.4",
+    "express": "^4.18.2",
     "vee-validate": "^2.2.0",
     "vue": "^2.6.10",
     "vue-chartkick": "^0.5.2",
